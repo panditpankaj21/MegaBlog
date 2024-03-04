@@ -1,21 +1,21 @@
 import { Link } from "react-router-dom"
 import databaseService from "../appwrite/config"
 
-function PostCard(props){
+function PostCard({post}){
     return (
-        <Link to={`/post/${props.post.$id}`}>
+        <Link to={`/post/${post.$id}`}>
             <div className="w-full bg-gray-100 rounded-xl p-4">
                 <div className=" w-full justify-center mb-4">
                     <img 
-                        src={databaseService.getFilePreview(props.post.featuredImage)} 
-                        alt={props.post.title}
+                        src={databaseService.getFilePreview(post.featuredImage)} 
+                        alt={post.title}
                         className="rounded-xl"
                     />
                 </div>
                 <h2
                     className="text-xl font-bold"
                 >
-                    {props.post.title}
+                    {post.title}
                 </h2>
             </div>
         </Link>

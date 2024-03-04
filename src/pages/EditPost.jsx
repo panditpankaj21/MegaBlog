@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import {Container, PostCard} from "../components/index";
+import {Container, PostForm} from "../components/index";
 import databaseService from "../appwrite/config";
 import { useNavigate, useParams } from "react-router-dom";
 
 
 function EditPost(){
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState(null);
     const {slug} = useParams()
     const navigate = useNavigate()
 
@@ -19,12 +19,17 @@ function EditPost(){
                     navigate('/')
                 }
             })
+            .catch((err)=>{
+                console.log(err)
+            })
         }
     }, [slug, navigate])
+
+
     return posts ? (
         <div className="py-8">
             <Container>
-                <PostCard post={posts} />
+                <PostForm post={posts} />
             </Container>
         </div>
     ) : null

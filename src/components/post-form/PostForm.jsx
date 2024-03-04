@@ -8,7 +8,6 @@ import { useSelector } from "react-redux"
 
 
 function PostForm({post}){
-
     const {register, handleSubmit, watch, setValue, control, getValues} = useForm({
         defaultValues:{
             title: post?.title || '',
@@ -17,6 +16,7 @@ function PostForm({post}){
             status: post?.status || 'active',
         }
     })
+    
 
     const navigate = useNavigate()
     const userData = useSelector(state => state.auth.userData)
@@ -44,10 +44,9 @@ function PostForm({post}){
             const file = await databaseService.uploadFile(data.image[0]);
 
             if(file){
-                console.log(userData.userData.$id)
                 const dbPost = await databaseService.createPost({
                     ...data,
-                    userId : userData.userData.$id,
+                    userId: userData.userData.$id,
                     featuredImage: file.$id,
                 })
 
