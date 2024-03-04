@@ -24,6 +24,7 @@ function Signup(){
                 }
             }
         } catch (error) {
+            console.log("Appwrite serive :: signup :: error", error)
             setError(error.message)
         }
     }

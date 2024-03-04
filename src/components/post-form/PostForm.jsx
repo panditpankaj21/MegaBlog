@@ -19,11 +19,12 @@ function PostForm({post}){
     })
 
     const navigate = useNavigate()
-    const userData = useSelector(state => state.user.userData)
+    const userData = useSelector(state => state.auth.userData)
 
     const submit = async(data) => {
         if(post){
             const file = data.image[0] ? databaseService.uploadFile(data.image[0]) : null
+            
 
             if(file){
                 databaseService.deleteFile(post.featuredImage)
@@ -39,14 +40,15 @@ function PostForm({post}){
             }
 
         }else{
-            const file = data.image[0] ? databaseService.uploadFile(data.image[0]) : null
+            
+            const file = await databaseService.uploadFile(data.image[0]);
 
             if(file){
-                const fileId = file.$id
-                data.featuredImage = fileId
+                console.log(userData.userData.$id)
                 const dbPost = await databaseService.createPost({
                     ...data,
-                    userId: userData.$id,
+                    userId : userData.userData.$id,
+                    featuredImage: file.$id,
                 })
 
                 if(dbPost){
@@ -91,7 +93,7 @@ function PostForm({post}){
                     label="Slug: "
                     placeholder= "Slug"
                     className="mb-4"
-                    {...register("slub", {required: true})}
+                    {...register("slug", {required: true})}
                     onInput={
                         (e) => {
                             setValue("slug", slugTransform(e.target.value), {shouldValidate: true})
@@ -123,7 +125,7 @@ function PostForm({post}){
                     </div>
                 )}
                 <Select
-                    option={["active", "inactive"]}
+                    options={["active", "inactive"]}
                     label="status"
                     className="mb-4"
                     {...register("status", {required: true})}
