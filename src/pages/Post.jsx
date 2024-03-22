@@ -4,6 +4,8 @@ import appwriteService from "../appwrite/config";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
+import {CommentForm} from "../components";
+import AllComments from "./AllComments";
 
 export default function Post() {
     const [post, setPost] = useState(null);
@@ -33,6 +35,7 @@ export default function Post() {
     };
 
     return post ? (
+        <>
         <div className="py-8">
             <Container>
                 <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
@@ -62,6 +65,10 @@ export default function Post() {
                     {parse(post.content)}
                     </div>
             </Container>
+            
         </div>
+        <CommentForm post={post} />
+        <AllComments post={post}/>
+        </>
     ) : null;
 }
