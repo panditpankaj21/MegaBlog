@@ -4,7 +4,7 @@ import {Comment} from "../components/index"
 
 export default function AllComments({post}){
     const [allComments, setAllComments] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
         setLoading(true);
