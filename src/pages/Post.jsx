@@ -4,12 +4,12 @@ import appwriteService from "../appwrite/config";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
-import {CommentForm} from "../components";
+import { CommentForm } from "../components";
 import AllComments from "./AllComments";
 
 export default function Post() {
     const [post, setPost] = useState(null);
-    const {slug} = useParams();
+    const { slug } = useParams();
     const navigate = useNavigate();
 
     const userData = useSelector((state) => state.auth.userData);
@@ -35,40 +35,40 @@ export default function Post() {
     };
 
     return post ? (
-        <>
-        <div className="py-8">
+        <div className="bg-gray-100 min-h-screen py-8">
             <Container>
-                <div className="w-full flex justify-center mb-4 relative border rounded-xl p-2">
+                <div className="max-w-4xl mx-auto bg-white rounded-xl overflow-hidden shadow-lg relative">
                     <img
                         src={appwriteService.getFilePreview(post.featuredImage)}
                         alt={post.title}
-                        className="rounded-xl"
+                        className="w-full h-auto object-cover"
                     />
-
                     {isAuthor && (
-                        <div className="absolute right-6 top-6">
+                        <div className="absolute top-0 right-0 mt-4 mr-4 flex space-x-2">
                             <Link to={`/edit-post/${post.$id}`}>
-                                <Button bgColor="bg-green-500" className="mr-3">
+                                <Button bgColor="bg-green-500" className="mr-2 px-3 py-1 rounded-md text-sm">
                                     Edit
                                 </Button>
                             </Link>
-                            <Button bgColor="bg-red-500" onClick={deletePost}>
+                            <Button bgColor="bg-red-500" onClick={deletePost}
+                            className="px-3 py-1 rounded-md text-sm"
+                            >
                                 Delete
                             </Button>
                         </div>
                     )}
-                </div>
-                <div className="w-full mb-6">
-                    <h1 className="text-2xl font-bold">{post.title}</h1>
-                </div>
-                <div className="browser-css">
-                    {parse(post.content)}
+                    <div className="p-6">
+                        <h1 className="text-3xl font-semibold mb-4">{post.title}</h1>
+                        <div className="text-gray-700 prose">
+                            {parse(post.content)}
+                        </div>
                     </div>
+                </div>
             </Container>
-            
+            <div className="mt-8">
+                <CommentForm post={post} />
+                <AllComments post={post} />
+            </div>
         </div>
-        <CommentForm post={post} />
-        <AllComments post={post}/>
-        </>
     ) : null;
 }
