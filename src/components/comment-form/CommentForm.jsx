@@ -2,7 +2,6 @@ import { useState } from 'react'
 import databaseService from "../../appwrite/config"
 
 function CommentForm({post}){
-  console.log(post)
     const [comment, setComment] = useState('');
 
     const handleSubmit = async (e) => {

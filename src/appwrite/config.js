@@ -171,6 +171,22 @@ export class Service{
     }
     async deleteComment(commentId){
         try {
+            //delete reply of related comment from database
+            const listOfReplies = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteReplyCollectionId
+            );
+            const toDeleteList = listOfReplies.documents.filter(reply => reply.commentId === commentId)
+
+            for (const reply of toDeleteList) {
+                await this.databases.deleteDocument(
+                    conf.appwriteDatabaseId,
+                    conf.appwriteReplyCollectionId,
+                    reply.$id
+                )
+            }
+            
+            //now delete comment from database
             await this.databases.deleteDocument(
                 conf.appwriteDatabaseId,
                 conf.appwriteCommentCollectionId,
@@ -200,7 +216,50 @@ export class Service{
         }
     }
 
+    async addReply(commentId, reply) {
+        try {
+            const userData = await authService.getCurrentUser();
+            return await this.databases.createDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteReplyCollectionId,
+                nanoid(),
+                {
+                    userId: userData.$id,
+                    reply,
+                    commentId,
+                    username: userData.name,
+                }
+            );
+        } catch (error) {
+            console.log("Appwrite serive :: addReply :: error", error);
+        }
+    }
 
+    async getReplyByCommentId(commentId){
+        try{
+            const response = await this.databases.listDocuments(
+                conf.appwriteDatabaseId,
+                conf.appwriteReplyCollectionId
+            );
+            return response.documents.filter(reply => reply.commentId === commentId);
+        }
+        catch(error){
+            console.log("Appwrite serive :: getReplyByCommentId :: error", error);
+        }
+    }
+    async deleteReply(replyId){
+        try {
+            await this.databases.deleteDocument(
+                conf.appwriteDatabaseId,
+                conf.appwriteReplyCollectionId,
+                replyId
+            )
+            return true
+        } catch (error) {
+            console.log("Appwrite serive :: deleteReply :: error", error);
+            return false
+        }
+    }
 }
 
 

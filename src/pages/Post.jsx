@@ -6,9 +6,11 @@ import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 import { CommentForm } from "../components";
 import AllComments from "./AllComments";
+import {Loading} from "../components/index"
 
 export default function Post() {
     const [post, setPost] = useState(null);
+    const [loading, setLoading] = useState(true)
     const { slug } = useParams();
     const navigate = useNavigate();
 
@@ -22,6 +24,7 @@ export default function Post() {
                 if (post) setPost(post);
                 else navigate("/");
             });
+            setLoading(false)
         } else navigate("/");
     }, [slug, navigate]);
 
@@ -33,9 +36,10 @@ export default function Post() {
             }
         });
     };
+    if(loading) return <Loading/>;
 
     return post ? (
-        <div className="bg-gray-100 min-h-screen py-8">
+        <div className="bg-gray-200 min-h-screen py-8">
             <Container>
                 <div className="max-w-4xl mx-auto bg-white rounded-xl overflow-hidden shadow-lg relative">
                     <img

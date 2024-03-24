@@ -25,7 +25,6 @@ export default function AllComments({post}){
             <h1>Loding</h1>
         </div>
     )
-    console.log(allComments)
 
     const comments = allComments.map((comment, index)=>{
         return <Comment 

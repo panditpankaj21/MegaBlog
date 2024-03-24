@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import relativeTime from '../computation/relativeTime';
 import { BsThreeDotsVertical } from "react-icons/bs";
-import authService from "../appwrite/auth"
-import databaseService from "../appwrite/config"
+import databaseService from "../appwrite/config";
 import { useSelector } from 'react-redux';
+import ReplyCard from './ReplyCard';
+import { set } from 'react-hook-form';
 
 const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, commentId }) => {
   const [isPostOwner, setIsPostOwner] = useState(false);
@@ -13,6 +14,10 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
   const time = relativeTime(createdAt);
   const [editMode, setEditMode] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
+  const [replyMode, setReplyMode] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [replies, setReplies] = useState([]);
+  const [isSave, setIsSave] = useState(false);
 
   useEffect(() => {
     if(user.userData.$id === postOwnerId){
@@ -21,7 +26,15 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
     if(user.userData.$id === userId){
       setCurrUser(true)
     }
-  }, []);
+
+    databaseService.getReplyByCommentId(commentId)
+    .then((response) => {
+        setReplies(response);
+    })
+    .catch((error) => {
+        console.log("Appwrite serive :: getReplyByCommentId :: error", error);
+    })
+  }, [isSave]);
 
   const handleDropdownToggle = () => {
     setShowDropdown(!showDropdown);
@@ -44,38 +57,70 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
   const handleSaveEdit = async () => {
     try {
       await databaseService.updateComment(commentId, editedContent);
-      console.log("Comment updated");
       setEditMode(false);
+      setIsSave(prev => !prev)
     } catch (error) {
       console.error("Error updating comment:", error);
     }
   };
 
   const handleDelete = async () => {
-    const deleteComment = await databaseService.deleteComment(commentId)
+    setShowDropdown(false);
+    const deleteComment = await databaseService.deleteComment(commentId);
     if(deleteComment){
       console.log("Comment deleted");
-    }else{
+    } else {
       console.log("Comment not deleted");
     }
-    setShowDropdown(false);
+    setIsSave(prev => !prev)
+  };
+
+  const handleReply = () => {
+    setReplyMode(true);
+    setShowDropdown(false)
+  };
+
+  const handleReplyContentChange = (e) => {
+    setReplyContent(e.target.value);
+  };
+
+  const handleCancelReply = () => {
+    setReplyContent("");
+    setReplyMode(false);
+  };
+
+  const handleSaveReply = async () => {
+    try {
+      await databaseService.addReply(commentId, replyContent);
+      setReplyContent("");
+      setReplyMode(false);
+      setIsSave(prev => !prev)
+    } 
+    catch (error) {
+      console.error("Error saving reply:", error);
+    }
   };
 
   return (
-    <div className="flex items-start p-4 relative hover:bg-gray-200 rounded-lg">
+    <div className="flex items-start p-4 relative rounded-lg  bg-gray-200">
       <img
-        className="w-10 h-10 rounded-full mr-4"
+        className="w-8 h-15 rounded-full mr-4 "
         src="https://cdn-icons-png.freepik.com/256/1077/1077114.png"
         alt={`${username}'s profile`}
       />
       <div className="flex flex-col w-full">
         <div className="flex justify-between items-center">
-          <p className="font-semibold text-gray-800">
-            @{username}
-            <span className=' text-gray-600 text-xs ml-2'>
-              {time}
-            </span>
-          </p>
+          <div className='flex items-center gap-2'>
+            <p 
+              className=" text-gray-800 font-bold">
+                @{username}
+            </p>
+            <p 
+              className='font-light text-gray-500 text-xs'>
+                {time}
+            </p>
+          </div>
+          
           {(isPostOwner || currUser) && (
             <BsThreeDotsVertical  
               className='text-gray-500 cursor-pointer hover:text-gray-800'
@@ -98,9 +143,16 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
               >
                 Delete
               </button>
+              <button 
+                className="block px-4 py-2 w-full text-sm text-gray-800 hover:bg-gray-100"
+                onClick={handleReply}
+              >
+                Reply
+              </button>
             </div>
           )}
         </div>
+        
         {editMode ? (
           <textarea
             className="w-full border border-gray-300 rounded-md p-2 mt-2"
@@ -108,12 +160,14 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
             onChange={handleContentChange}
           />
         ) : (
-          <p className="text-gray-700 mt-2">{content}</p>
+          <p className="text-gray-700">{content}</p>
         )}
+        
+
         {editMode && (
-          <div className="flex justify-end mt-2">
+          <div className="flex justify-end mt-2 font-bold">
             <button 
-              className="px-4 py-2 mr-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+              className="px-4 py-2 mr-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-            600"
               onClick={handleSaveEdit}
             >
               Save
@@ -126,9 +180,44 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
             </button>
           </div>
         )}
+        {replyMode && (
+          <>
+          <div className="flex items-start mt-2">
+            <img
+              className="w-8 h-15 rounded-full mr-2"
+              src="https://cdn-icons-png.freepik.com/256/1077/1077114.png"
+              alt="Profile"
+            />
+            <textarea
+              className="w-full border border-gray-300 rounded-md p-2"
+              placeholder="Write a reply..."
+              value={replyContent}
+              onChange={handleReplyContentChange}
+            />
+          </div>
+          <div className="flex justify-end mt-2 font-bold">
+            <button 
+              className="px-4 py-2 mr-2 text-sm text-white bg-blue-500 rounded-md hover:bg-blue-600"
+              onClick={handleSaveReply}
+            >
+              Save
+            </button>
+            <button 
+              className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+              onClick={handleCancelReply}
+            >
+              Cancel
+            </button>
+        </div>
+        </>
+        )}
+        {replies.map((reply, index) => (
+          <ReplyCard key={index} reply={reply}/>
+        ))}
       </div>
     </div>
   );
 };
 
 export default Comment;
+

@@ -15,6 +15,7 @@ import Select from "./Select";
 import CommentForm from "./comment-form/CommentForm";
 import Comment from "./Comment";
 import Loading from "./Loading";
+import ReplyCard from "./ReplyCard";
 
 export {
     Header, 
@@ -34,4 +35,5 @@ export {
     CommentForm,
     Comment,
     Loading,
+    ReplyCard, 
 }
