@@ -241,6 +241,7 @@ export class Service{
                 conf.appwriteDatabaseId,
                 conf.appwriteReplyCollectionId
             );
+            
             return response.documents.filter(reply => reply.commentId === commentId);
         }
         catch(error){

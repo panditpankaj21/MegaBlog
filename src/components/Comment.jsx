@@ -20,21 +20,30 @@ const Comment = ({ username, content, createdAt, postOwnerId, postId, userId, co
   const [isSave, setIsSave] = useState(false);
 
   useEffect(() => {
-    if(user.userData.$id === postOwnerId){
-      setIsPostOwner(true)
+    if (user.userData.$id === postOwnerId) {
+      setIsPostOwner(true);
     }
-    if(user.userData.$id === userId){
-      setCurrUser(true)
+    if (user.userData.$id === userId) {
+      setCurrUser(true);
     }
-
-    databaseService.getReplyByCommentId(commentId)
-    .then((response) => {
+  
+    const fetchData = async () => {
+      try {
+        const response = await databaseService.getReplyByCommentId(commentId);
         setReplies(response);
-    })
-    .catch((error) => {
-        console.log("Appwrite serive :: getReplyByCommentId :: error", error);
-    })
+      } catch (error) {
+        console.log("Appwrite service :: getReplyByCommentId :: error", error);
+      }
+    };
+  
+    fetchData();
+  
+    return () => {
+      // Cleanup code here (if any)
+      // This code runs when the component is unmounted
+    };
   }, [isSave]);
+  
 
   const handleDropdownToggle = () => {
     setShowDropdown(!showDropdown);
